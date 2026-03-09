@@ -1,0 +1,106 @@
+"use client";
+
+import { Mic, SendHorizonal, Upload } from "lucide-react";
+import { useState, useRef } from "react";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { conversation , useEditorStore} from "@/store";
+import axios from "axios";
+const API = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
+
+export default function RuixenQueryBox() {
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
+    minHeight: 56,
+    maxHeight: 220,
+  });
+  const [inputValue, setInputValue] = useState("");
+
+  const fileInputRef = useRef(null);
+const { messages, setMsg, isLoading, setLoading } = conversation();
+const { code } = useEditorStore();
+
+const handleSend = async () => {
+  const trimmedInput = inputValue.trim();
+  if (!trimmedInput || isLoading) return;
+
+  setInputValue("");
+  adjustHeight(true);
+  setMsg(trimmedInput, "right");
+  setLoading(true);
+
+  try {
+    const response = await axios.post(
+  "https://codesphere-backend-7g1g.onrender.com/chatbot/",
+  {
+    currentMsg: trimmedInput,
+    history: messages,
+    code,
+  },
+  {
+    timeout: 30000,
+  }
+);
+    setMsg(response.data.reply, "left");
+  } catch {
+    setMsg("I'm having trouble connecting right now.", "left");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  const handleFileUpload = (files) => {
+    if (!files) return;
+    console.log("Uploaded files:", files);
+  };
+
+  return (
+    <div className="w-full px-4 py-6">
+      <div
+        className="relative max-w-2xl mx-auto bg-white rounded-2xl border border-gray-300 shadow-sm overflow-hidden"
+        style={{
+          backgroundImage:
+            "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS36l8YyviUgsNoqle8bYfzoxRFvd7_SLojHQ&s')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}>
+        <Textarea
+          id="ai-textarea"
+          ref={textareaRef}
+          placeholder="Ask anything..."
+          className={cn(
+            "w-full resize-none border-none bg-transparent",
+            "text-base text-white placeholder:text-gray-400",
+            "px-5 py-4 pr-24 rounded-2xl leading-[1.4]",
+            "transition-all focus-visible:ring-0 focus-visible:ring-offset-0"
+          )}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            adjustHeight();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }} />
+
+        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={!inputValue.trim()}
+            className={cn("p-2 rounded-full transition-colors", inputValue.trim()
+              ? "bg-[#004a58] text-white"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed")}>
+            <SendHorizonal className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
