@@ -22,7 +22,7 @@ useEffect(() => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("https://codesphere-backend-7g1g.onrender.com/vis/", {
+      const response = await axios.post("https://manas28.pythonanywhere.com/vis/", {
         code,
         input: inp,
       });

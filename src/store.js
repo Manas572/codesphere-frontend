@@ -2,7 +2,16 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware";
 
 const DEFAULT_CODE = {
-  javascript: `console.log("Hello, World!");`,
+  javascript: `// for Visualization
+  // Use input() to read input
+// Example input: 3
+// for execution
+//const fs = require('fs');
+//const n = Number(fs.readFileSync(0, 'utf8').trim());
+const n = Number(input());
+for(let i = 1; i <= n; i++){
+    console.log(i);
+}`,
 
   python: `print("Hello, World!")`,
 

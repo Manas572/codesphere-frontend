@@ -7,7 +7,6 @@ import { User, Trophy, Lightbulb, BarChart3 } from "lucide-react";
 import { FeaturesSectionWithHoverEffects } from "@/components/feature-section-with-hover-effects";
 import { TagDashboard } from "@/components/Tag";
 import PerformanceChart from "@/components/PerformanceChart";
-const API = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 
 const Analysis = () => {
   const [analytics, setAnalytics] = useState({ tag_stats: {} });
@@ -118,45 +117,64 @@ const Analysis = () => {
       badge: null,
     },
   ];
-
   useEffect(() => {
-    const fetchAllData = async () => {
-      setLoading(true);
-      try {
-        const [infoRes, subRes, conRes] = await Promise.all([
-          axios.get("https://codesphere-backend-7g1g.onrender.com/info/", { params: { userId } }),
-axios.get("https://codesphere-backend-7g1g.onrender.com/sub/", { params: { userId } }),
-axios.get("https://codesphere-backend-7g1g.onrender.com/con/", { params: { userId } }),
-]);
+  const fetchAllData = async () => {
+    if (!userId ) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const infoRes = await axios.get("https://manas28.pythonanywhere.com/info/", {
+        params: { userId },
+      });
 
-        setData(infoRes.data.result);
-        const [lifetime, recent] = conRes.data || [];
-        setContestStats({
-          lifetime,
-          recent,
-        });
-        setAnalytics(subRes.data || { tag_stats: {} });
-        const ratingBucket = subRes.data.rating_bucket;
-        const transformed = Object.entries(ratingBucket)
-          .map(([rating, count]) => ({ rating, count }))
-          .sort((a, b) => Number(a.rating) - Number(b.rating));
+      setData(infoRes.data?.result || []);
 
-        setRatingChartData(transformed);
-        setVerdictChartData(
-          Object.entries(subRes.data.verdicts).map(([verdict, count]) => ({
-            verdict,
-            count,
-          })),
-        );
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const subRes = await axios.get("https://manas28.pythonanywhere.com/sub/", {
+        params: { userId },
+      });
 
-    if (userId) fetchAllData();
-  }, [userId]);
+      const subData = subRes.data || {};
+
+      setAnalytics(subData);
+
+      const ratingBucket = subData.rating_bucket || {};
+
+      const transformed = Object.entries(ratingBucket)
+        .map(([rating, count]) => ({
+          rating,
+          count,
+        }))
+        .sort((a, b) => Number(a.rating) - Number(b.rating));
+
+      setRatingChartData(transformed);
+
+      setVerdictChartData(
+        Object.entries(subData.verdicts || {}).map(([verdict, count]) => ({
+          verdict,
+          count,
+        }))
+      );
+
+      const conRes = await axios.get("https://manas28.pythonanywhere.com/con/", {
+        params: { userId },
+      });
+
+      const [lifetime = null, recent = null] = conRes.data || [];
+
+      setContestStats({
+        lifetime,
+        recent,
+      });
+    } catch (e) {
+      setError(e.response?.data?.error || e.message || "Something went wrong");
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAllData();
+}, [userId]);
 
   if (loading) {
     return (

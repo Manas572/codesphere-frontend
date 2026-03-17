@@ -33,7 +33,7 @@ const handleSend = async () => {
 
   try {
     const response = await axios.post(
-  "https://codesphere-backend-7g1g.onrender.com/chatbot/",
+  "https://manas28.pythonanywhere.com//chatbot/",
   {
     currentMsg: trimmedInput,
     history: messages,

@@ -5,10 +5,9 @@ import axios from "axios";
 import { runAndTrace } from "@/lib/jstracer";
 import { Visualization } from "@/store";
 import { 
-  Play, Terminal, Zap, Box, CheckCircle2, 
+  Play, Terminal, CheckCircle2, 
   XCircle, AlertCircle, Eye, Cpu, Clock 
 } from "lucide-react";
-const API = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
 
 const Out = () => {
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ const Out = () => {
     setIsLoading(true);
     setResults(null);
     try {
-      const response = await axios.post(`${API}/execute/`, {
+      const response = await axios.post("https://manas28.pythonanywhere.com/execute/", {
         language, code,
         testCases: [{ input: inp, expectedOutput: expectedOutput }]
       });
@@ -52,7 +51,7 @@ const Out = () => {
     setftc(true);
     setActiveTab("result"); 
     try {
-      const response = await axios.post(`${API}/TC/`, { code });
+      const response = await axios.post("https://manas28.pythonanywhere.com/TC/", { code });
       const answer = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
       setOutput(answer || "Could not analyze complexity.");
     } catch (error) {
