@@ -5,13 +5,10 @@ import { useEditorStore } from '@/store'
 
 const Ide = () => {
   const editorRef = useRef()
-
   const { language, code, setCode } = useEditorStore()
-
   function valchange(el) {
     setCode(el ?? '')
   }
-
   const onMount = (editor) => {
     editorRef.current = editor
     editor.focus()
