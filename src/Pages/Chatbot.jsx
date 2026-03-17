@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import ChatInterface from "@/components/ChatInterface";
+import ChatInterface from "@/components/ChatInt";
 import { Navbar } from "@/components/Navbar";
 import RuixenQueryBox from "@/components/ruixen-query-box";
 import { conversation } from "@/store";
