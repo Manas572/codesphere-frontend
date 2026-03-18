@@ -32,8 +32,8 @@ int main() {
 
 
 export const useEditorStore = create((set,get) => ({
-  language: "javascript",
-  code: DEFAULT_CODE.javascript,
+  language: "python",
+  code: DEFAULT_CODE.python,
   inp:"",
   setLanguage: (lang) => {
     const { language, code ,inp} = get()

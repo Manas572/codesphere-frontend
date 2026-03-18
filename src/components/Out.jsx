@@ -34,18 +34,39 @@ const Out = () => {
   }
 
   async function Runit() {
-    setIsLoading(true);
-    setResults(null);
-    try {
-      const response = await axios.post("https://manas28.pythonanywhere.com/execute/", {
-        language, code,
+  setIsLoading(true);
+  setResults(null);
+  try {
+    const response = await axios.post(
+      "https://codesphere-backend-7g1g.onrender.com/execute/",
+      {
+        language,
+        code,
         testCases: [{ input: inp, expectedOutput: expectedOutput }]
+      },
+      {
+        timeout: 10000
+      }
+    );
+    setResults(response.data);
+    setActiveTab("result");
+  } catch (error) {
+    if (error.code === "ECONNABORTED") {
+      setResults({
+        success: false,
+        message: "Render backend is waking up. Please try again in a few seconds."
       });
-      setResults(response.data);
-      setActiveTab("result");
-    } catch (error) { console.error(error); } finally { setIsLoading(false); }
+    } else {
+      setResults({
+        success: false,
+        message: "Execution failed. Please retry."
+      });
+    }
+    setActiveTab("result");
+  } finally {
+    setIsLoading(false);
   }
-
+}
   async function findtc() {
     if (!code || !code.trim()) return;
     setftc(true);
@@ -142,31 +163,59 @@ const Out = () => {
                 </div>
               </div>
             )}
-
             {results?.results?.[0] ? (
-              <div className="animate-in slide-in-from-bottom-2 duration-300">
-                <div className={`p-4 rounded-lg border flex items-center justify-between ${results.summary?.allPassed ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
-                  <div className="flex items-center gap-3">
-                    {results.summary?.allPassed ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />}
-                    <div>
-                      <h3 className={`font-bold ${results.summary?.allPassed ? 'text-green-500' : 'text-red-500'}`}>
-                        {results.results[0].message || (results.summary?.allPassed ? "Accepted" : "Wrong Answer")}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label className="text-[10px] text-gray-500 font-bold uppercase mb-2 block tracking-widest">Actual Output</label>
-                  <div className="bg-[#0f0f0f] rounded-lg border border-gray-800 p-3">
-                    <pre className="font-mono text-sm text-gray-300">{results.results[0].actualOutput || "No output"}</pre>
-                  </div>
-                </div>
-              </div>
-            ) : !output && (
-              <div className="flex flex-col items-center justify-center py-20 text-gray-600">
-                <AlertCircle className="mb-2 opacity-20" size={48} />
-                <p className="text-sm">Run code or check complexity to see results</p>
-              </div>
+  <div className="animate-in slide-in-from-bottom-2 duration-300">
+    <div
+      className={`p-4 rounded-lg border flex items-center justify-between ${
+        results.summary?.allPassed
+          ? "bg-green-500/10 border-green-500/20"
+          : "bg-red-500/10 border-red-500/20"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {results.summary?.allPassed ? (
+          <CheckCircle2 className="text-green-500" />
+        ) : (
+          <XCircle className="text-red-500" />
+        )}
+        <div>
+          <h3
+            className={`font-bold ${
+              results.summary?.allPassed ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {results.results[0].message ||
+              (results.summary?.allPassed ? "Accepted" : "Wrong Answer")}
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-4">
+      <label className="text-[10px] text-gray-500 font-bold uppercase mb-2 block tracking-widest">
+        Actual Output
+      </label>
+      <div className="bg-[#0f0f0f] rounded-lg border border-gray-800 p-3">
+        <pre className="font-mono text-sm text-gray-300">
+          {results.results[0].actualOutput || "No output"}
+        </pre>
+      </div>
+    </div>
+  </div>
+) : results?.message ? (
+  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+    <div className="flex items-center gap-2 text-yellow-400 font-bold text-xs uppercase tracking-wider mb-2">
+      <AlertCircle size={14} /> Notice
+    </div>
+    <div className="text-sm text-gray-300 font-mono">
+      {results.message}
+    </div>
+  </div>
+) : !output && (
+  <div className="flex flex-col items-center justify-center py-20 text-gray-600">
+    <AlertCircle className="mb-2 opacity-20" size={48} />
+    <p className="text-sm">Run code or check complexity to see results</p>
+  </div>
             )}
           </div>
         )}
