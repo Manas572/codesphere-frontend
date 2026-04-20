@@ -30,78 +30,70 @@ int main() {
 }`,
 }
 
-
-export const useEditorStore = create((set,get) => ({
-  language: "python",
-  code: DEFAULT_CODE.python,
-  inp:"",
-  setLanguage: (lang) => {
-    const { language, code ,inp} = get()
-
-    if (lang === language) return
-    set({
-      language: lang,
-      code: DEFAULT_CODE[lang],
+export const useEditorStore = create(
+  persist(
+    (set, get) => ({
+      language: "python",
+      code: DEFAULT_CODE.python,
       inp: "",
-    })
-  },
 
-   setCode: (newCode) => set({ code: newCode }),
-   setInp: (newinp) => set({inp:newinp}),
-}))
+      setLanguage: (lang) => {
+        const { language } = get();
+        if (lang === language) return;
 
-export const conversation = create(
-  persist(
-    (set) => ({
-      idCounter: 1,
-      messages: [],
-      isLoading: false,
-
-      setLoading: (val) => set({ isLoading: val }),
-
-      setMsg: (content, sender = "left") =>
-        set((state) => ({
-          messages: [
-            ...state.messages,
-            { id: state.idCounter, sender, content, type: "text" },
-          ],
-          idCounter: state.idCounter + 1,
-        })),
-    }),
-    {
-      name: "conversation-store",
-    }
-  )
-);
-
-export const Visualization = create(
-  persist(
-    (set) => ({
-      stepno: 0,
-      steps: [],
-
-      setSteps: (newSteps) =>
         set({
-          steps: newSteps,
-          stepno: 0,
-        }),
+          language: lang,
+          code: DEFAULT_CODE[lang],
+          inp: "",
+        });
+      },
 
-      setNextStep: () =>
-        set((state) => ({
-          stepno: Math.min(state.stepno + 1, state.steps.length - 1),
-        })),
-
-      setPrevStep: () =>
-        set((state) => ({
-          stepno: Math.max(state.stepno - 1, 0),
-        })),
+      setCode: (newCode) => set({ code: newCode }),
+      setInp: (newinp) => set({ inp: newinp }),
     }),
     {
-      name: "visualization-store",
+      name: "editor-store",
     }
   )
 );
 
+export const conversation = create((set) => ({
+  idCounter: 1,
+  messages: [],
+  isLoading: false,
+
+  setLoading: (val) => set({ isLoading: val }),
+
+  setMsg: (content, sender = "left") =>
+    set((state) => ({
+      messages: [
+        ...state.messages,
+        { id: state.idCounter, sender, content, type: "text" },
+      ],
+      idCounter: state.idCounter + 1,
+    })),
+}));
+
+export const Visualization = create((set) => ({
+  stepno: 0,
+  steps: [],
+
+  setSteps: (newSteps) =>
+    set({
+      steps: newSteps,
+      stepno: 0,
+    }),
+
+  setNextStep: () =>
+    set((state) => ({
+      stepno: Math.min(state.stepno + 1, state.steps.length - 1),
+    })),
+
+  setPrevStep: () =>
+    set((state) => ({
+      stepno: Math.max(state.stepno - 1, 0),
+    })),
+}));
 
 export const useUserStore = create(
   persist(
